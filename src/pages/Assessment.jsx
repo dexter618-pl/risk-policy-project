@@ -72,27 +72,26 @@ useEffect(() => {
 
       // ✅ Submit assessment
       const res = await submitAssessment(payload);
-      console.log("Backend /submit-assessment response:", res.data);
+console.log("Backend /submit-assessment response:", res);
 
-      setScore(res.data.score);
-      setAssessmentId(res.data.assessment_id);
+setScore(res.score);
+setAssessmentId(res.assessment_id);
 
-      // ✅ Fetch AI recommendations
-      const recRes = await fetchRecommendations({
-        assessment_id: res.data.assessment_id,
-        score: res.data.score,
-      });
+// ✅ Fetch AI recommendations
+const recRes = await fetchRecommendations(res.assessment_id, res.score);
 
-      navigate("/results", {
-        state: {
-          score: res.data.score,
-          assessmentId: res.data.assessment_id,
-          recommendations: recRes.data.recommendations,
-          answers,
-        },
-      });
+navigate("/results", {
+  state: {
+    score: res.score,
+    assessmentId: res.assessment_id,
+    recommendations: recRes.recommendations,
+    answers,
+  },
+});
 
-      console.log("Backend /ai-recommendations response:", recRes.data);
+console.log("Backend /ai-recommendations response:", recRes);
+setRecommendations(recRes.recommendations);
+
       setRecommendations(recRes.data.recommendations);
     } catch (error) {
       console.error("Error submitting or fetching recommendations:", error);
