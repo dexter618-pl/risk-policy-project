@@ -30,7 +30,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const Assessment = () => {
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState([]);  // always start as []
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
   const [recommendations, setRecommendations] = useState("");
@@ -41,8 +41,18 @@ const Assessment = () => {
   // ✅ Load questions
   useEffect(() => {
     fetchQuestions()
-      .then((res) => setQuestions(res.data))
-      .catch((err) => console.error("Error fetching questions:", err));
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setQuestions(res.data);
+        } else {
+          console.error("Questions response is not an array:", res.data);
+          setQuestions([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching questions:", err);
+        setQuestions([]);
+      });
   }, []);
 
   const handleChange = (id, value) => {
@@ -147,7 +157,7 @@ const Assessment = () => {
 
       {/* Questions */}
       <Box>
-        {questions.length === 0 ? (
+        {!questions || questions.length === 0 ? (
           <Paper elevation={0} sx={{ p: 3, textAlign: "center" }}>
             <Typography variant="body1">Loading questions…</Typography>
           </Paper>
@@ -269,6 +279,7 @@ const Assessment = () => {
 };
 
 export default Assessment;
+
 
 
 
