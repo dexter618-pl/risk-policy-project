@@ -38,22 +38,24 @@ const Assessment = () => {
   const [assessmentId, setAssessmentId] = useState(null);
   const navigate = useNavigate(); 
 
+  
   // ✅ Load questions
-  useEffect(() => {
-    fetchQuestions()
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setQuestions(res.data);
-        } else {
-          console.error("Questions response is not an array:", res.data);
-          setQuestions([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching questions:", err);
+useEffect(() => {
+  fetchQuestions()
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setQuestions(data);
+      } else {
+        console.error("Questions response is not an array:", data);
         setQuestions([]);
-      });
-  }, []);
+      }
+    })
+    .catch((err) => {
+      console.error("Error fetching questions:", err);
+      setQuestions([]);
+    });
+}, []);
+
 
   const handleChange = (id, value) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
