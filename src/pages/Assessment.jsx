@@ -30,7 +30,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const Assessment = () => {
-  const [questions, setQuestions] = useState([]);  // always start as []
+  const [questions, setQuestions] = useState([]);  
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
   const [recommendations, setRecommendations] = useState("");
@@ -38,24 +38,22 @@ const Assessment = () => {
   const [assessmentId, setAssessmentId] = useState(null);
   const navigate = useNavigate(); 
 
-  
   // ✅ Load questions
-useEffect(() => {
-  fetchQuestions()
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setQuestions(data);
-      } else {
-        console.error("Questions response is not an array:", data);
+  useEffect(() => {
+    fetchQuestions()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setQuestions(data);
+        } else {
+          console.error("Questions response is not an array:", data);
+          setQuestions([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching questions:", err);
         setQuestions([]);
-      }
-    })
-    .catch((err) => {
-      console.error("Error fetching questions:", err);
-      setQuestions([]);
-    });
-}, []);
-
+      });
+  }, []);
 
   const handleChange = (id, value) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -72,27 +70,25 @@ useEffect(() => {
 
       // ✅ Submit assessment
       const res = await submitAssessment(payload);
-console.log("Backend /submit-assessment response:", res);
+      console.log("Backend /submit-assessment response:", res);
 
-setScore(res.score);
-setAssessmentId(res.assessment_id);
+      setScore(res.score);
+      setAssessmentId(res.assessment_id);
 
-// ✅ Fetch AI recommendations
-const recRes = await fetchRecommendations(res.assessment_id, res.score);
+      // ✅ Fetch AI recommendations
+      const recRes = await fetchRecommendations(res.assessment_id, res.score);
+      console.log("Backend /ai-recommendations response:", recRes);
 
-navigate("/results", {
-  state: {
-    score: res.score,
-    assessmentId: res.assessment_id,
-    recommendations: recRes.recommendations,
-    answers,
-  },
-});
+      setRecommendations(recRes?.recommendations || "");
 
-console.log("Backend /ai-recommendations response:", recRes);
-setRecommendations(recRes.recommendations);
-
-      setRecommendations(recRes.data.recommendations);
+      navigate("/results", {
+        state: {
+          score: res.score,
+          assessmentId: res.assessment_id,
+          recommendations: recRes?.recommendations || "",
+          answers,
+        },
+      });
     } catch (error) {
       console.error("Error submitting or fetching recommendations:", error);
     }
@@ -105,14 +101,14 @@ setRecommendations(recRes.recommendations);
         return;
       }
 
-      // ✅ Generate policy
+      // ✅ api.generatePolicy already returns res.data
       const policyRes = await generatePolicy({
         assessment_id: assessmentId,
         recommendations: recommendations,
       });
 
-      console.log("Backend /generate-policy response:", policyRes.data);
-      setPolicy(policyRes.data.policy);
+      console.log("Backend /generate-policy response:", policyRes);
+      setPolicy(policyRes?.policy || "");
     } catch (error) {
       console.error("Error generating policy:", error);
     }
@@ -128,10 +124,12 @@ setRecommendations(recRes.recommendations);
         policy: policy,
       };
 
-      // ✅ Generate report (PDF blob)
+      // ✅ api.downloadReport should return the blob directly
       const response = await downloadReport(payload);
 
-      const blob = new Blob([response.data], { type: "application/pdf" });
+      console.log("Backend /download-report response:", response);
+
+      const blob = new Blob([response], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -280,6 +278,7 @@ setRecommendations(recRes.recommendations);
 };
 
 export default Assessment;
+
 
 
 

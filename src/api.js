@@ -3,12 +3,6 @@ import axios from "axios";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-// Fetch all assessments
-//export const fetchQuestions = async () => {
-  //const res = await axios.get(`${API_BASE}/questions`);
-  //return res.data;
-//};
-
 // Fetch all questions
 export const fetchQuestions = async () => {
   const res = await axios.get(`${API_BASE}/questions`);
@@ -30,16 +24,13 @@ export const fetchRecommendations = async (assessmentId, score) => {
   return res.data;
 };
 
-// Generate policy
-export const generatePolicy = async (assessmentId, recommendations) => {
-  const res = await axios.post(`${API_BASE}/generate-policy`, {
-    assessment_id: assessmentId,
-    recommendations,
-  });
+// Generate policy (expects payload object)
+export const generatePolicy = async (payload) => {
+  const res = await axios.post(`${API_BASE}/generate-policy`, payload);
   return res.data;
 };
 
-// Download PDF report
+// Download PDF report (returns Blob, frontend handles saving)
 export const downloadReport = async (payload) => {
   const res = await fetch(`${API_BASE}/generate-report`, {
     method: "POST",
@@ -49,10 +40,5 @@ export const downloadReport = async (payload) => {
 
   if (!res.ok) throw new Error("Failed to download report");
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "assessment_report.pdf";
-  link.click();
+  return await res.blob(); // return blob to Assessment.jsx
 };
