@@ -108,7 +108,7 @@ const Assessment = () => {
       });
 
       console.log("Backend /generate-policy response:", policyRes);
-      setPolicy(policyRes?.policy || "");
+      setPolicy(policyRes.policy);
     } catch (error) {
       console.error("Error generating policy:", error);
     }
