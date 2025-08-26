@@ -11,16 +11,15 @@ const Results = () => {
   const [policy, setPolicy] = useState("");
 
   const handleGeneratePolicy = async () => {
-    try {
-      const res = await generatePolicy({
-        assessment_id: assessmentId,
-        recommendations,
-      });
-      setPolicy(res.data.policy);
-    } catch (error) {
-      console.error("Error generating policy:", error);
-    }
-  };
+  try {
+    const res = await generatePolicy(assessmentId, recommendations);
+    console.log("Backend /generate-policy response:", res);
+    setPolicy(res.policy);  // res already IS res.data
+  } catch (error) {
+    console.error("Error generating policy:", error);
+  }
+};
+
 
   const handleDownloadReport = async () => {
     try {
