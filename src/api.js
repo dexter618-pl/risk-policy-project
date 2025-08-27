@@ -40,5 +40,14 @@ export const downloadReport = async (payload) => {
 
   if (!res.ok) throw new Error("Failed to download report");
 
-  return await res.blob(); // return blob to Assessment.jsx
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "assessment_report.pdf");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 };
+
