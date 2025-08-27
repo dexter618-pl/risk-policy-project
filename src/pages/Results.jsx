@@ -1,7 +1,6 @@
+// src/components/Results.jsx
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-
-// ✅ Import API functions
 import { generatePolicy, downloadReport } from "../api";
 
 const Results = () => {
@@ -11,15 +10,17 @@ const Results = () => {
   const [policy, setPolicy] = useState("");
 
   const handleGeneratePolicy = async () => {
-  try {
-    const res = await generatePolicy(assessmentId, recommendations);
-    console.log("Backend /generate-policy response:", res);
-    setPolicy(res.policy);  // res already IS res.data
-  } catch (error) {
-    console.error("Error generating policy:", error);
-  }
-};
-
+    try {
+      const res = await generatePolicy({
+        assessment_id: assessmentId,
+        recommendations: recommendations,
+      });
+      console.log("Backend /generate-policy response:", res);
+      setPolicy(res.policy);
+    } catch (error) {
+      console.error("Error generating policy:", error);
+    }
+  };
 
   const handleDownloadReport = async () => {
     try {
@@ -30,54 +31,30 @@ const Results = () => {
         recommendations,
         policy,
       };
-
-      // ✅ generateReport already returns a blob in api.js
-      const response = await downloadReport(payload);
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "assessment_report.pdf";
-      link.click();
+      await downloadReport(payload);
     } catch (error) {
       console.error("Error downloading report:", error);
     }
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Assessment Results</h1>
+    <div className="results-container">
+      <h2>Assessment Results</h2>
+      <p><strong>Score:</strong> {score}</p>
 
-      <div className="p-4 border rounded shadow mb-6">
-        <h2 className="text-lg font-semibold">Your Score: {score}</h2>
-      </div>
+      <h3>Recommendations</h3>
+      <pre>{recommendations || "No recommendations available."}</pre>
 
-      <div className="p-4 border rounded shadow mb-6">
-        <h3 className="font-semibold">AI Recommendations</h3>
-        <p className="p-2 bg-gray-100 rounded">{recommendations}</p>
-      </div>
-
-      <button
-        onClick={handleGeneratePolicy}
-        className="mt-4 bg-green-500 text-white px-4 py-2 rounded shadow"
-      >
-        Generate Policy
-      </button>
+      <button onClick={handleGeneratePolicy}>Generate Policy</button>
 
       {policy && (
-        <div className="mt-4 p-4 border rounded shadow bg-gray-50">
-          <h3 className="font-semibold">Generated Policy</h3>
-          <p className="whitespace-pre-line">{policy}</p>
-        </div>
+        <>
+          <h3>Generated Policy</h3>
+          <pre>{policy}</pre>
+        </>
       )}
 
-      <button
-        onClick={handleDownloadReport}
-        className="mt-4 bg-purple-500 text-white px-4 py-2 rounded shadow"
-      >
-        Download Report
-      </button>
+      <button onClick={handleDownloadReport}>Download PDF Report</button>
     </div>
   );
 };
